@@ -1,0 +1,162 @@
+Here’s a step-by-step guide to building a RESTful API with **Express.js** and testing it using **Postman**:
+
+---
+
+### 1. **Set Up Your Project**
+1. **Initialize a Node.js 
+
+
+   mkdir rest-api-example
+   cd rest-api-example
+   npm init -y
+   ```
+2. **Install Express and other dependencies**
+   ```bash
+   npm install express body-parser
+   ```
+
+3. **Install Development Tools (Optional)**
+   For easier testing and debugging:
+   ```bash
+   npm install --save-dev nodemon
+   ```
+
+4. **Update `package.json` for Nodemon**
+   Add the following script to the `scripts` section:
+   ```json
+   "scripts": {
+     "start": "nodemon server.js"
+   }
+   ```
+
+---
+
+### 2. **Create the Server**
+1. **Create `server.js`**
+   ```bash
+   touch server.js
+   ```
+
+2. **Write the Base Code in `server.js`**
+   ```javascript
+   const express = require('express');
+   const bodyParser = require('body-parser');
+
+   const app = express();
+   const PORT = 3000;
+
+   // Middleware
+   app.use(bodyParser.json());
+
+   // Dummy data
+   let users = [
+       { id: 1, name: "Alice", email: "alice@example.com" },
+       { id: 2, name: "Bob", email: "bob@example.com" }
+   ];
+
+   // Routes
+
+   // Get all users
+   app.get('/api/users', (req, res) => {
+       res.status(200).json(users);
+   });
+
+   // Get user by ID
+   app.get('/api/users/:id', (req, res) => {
+       const user = users.find(u => u.id === parseInt(req.params.id));
+       if (!user) {
+           return res.status(404).json({ error: "User not found" });
+       }
+       res.status(200).json(user);
+   });
+
+   // Add a new user
+   app.post('/api/users', (req, res) => {
+       const { name, email } = req.body;
+       const newUser = { id: users.length + 1, name, email };
+       users.push(newUser);
+       res.status(201).json(newUser);
+   });
+
+   // Update a user
+   app.put('/api/users/:id', (req, res) => {
+       const user = users.find(u => u.id === parseInt(req.params.id));
+       if (!user) {
+           return res.status(404).json({ error: "User not found" });
+       }
+       const { name, email } = req.body;
+       user.name = name || user.name;
+       user.email = email || user.email;
+       res.status(200).json(user);
+   });
+
+   // Delete a user
+   app.delete('/api/users/:id', (req, res) => {
+       const userIndex = users.findIndex(u => u.id === parseInt(req.params.id));
+       if (userIndex === -1) {
+           return res.status(404).json({ error: "User not found" });
+       }
+       users.splice(userIndex, 1);
+       res.status(204).send();
+   });
+
+   // Start the server
+   app.listen(PORT, () => {
+       console.log(`Server running on http://localhost:${PORT}`);
+   });
+   ```
+
+---
+
+### 3. **Start the Server**
+Run the following command to start the server:
+```bash
+npm start
+```
+
+You should see:
+```
+Server running on http://localhost:3000
+```
+
+---
+
+### 4. **Test with Postman**
+1. **Install Postman** (if not already installed).
+2. **Test the API Endpoints**:
+   - **GET /api/users**
+     - URL: `http://localhost:3000/api/users`
+     - Method: `GET`
+   - **GET /api/users/:id**
+     - URL: `http://localhost:3000/api/users/1`
+     - Method: `GET`
+   - **POST /api/users**
+     - URL: `http://localhost:3000/api/users`
+     - Method: `POST`
+     - Body (JSON):
+       ```json
+       {
+           "name": "Charlie",
+           "email": "charlie@example.com"
+       }
+       ```
+   - **PUT /api/users/:id**
+     - URL: `http://localhost:3000/api/users/2`
+     - Method: `PUT`
+     - Body (JSON):
+       ```json
+       {
+           "name": "Updated Bob",
+           "email": "updatedbob@example.com"
+       }
+       ```
+   - **DELETE /api/users/:id**
+     - URL: `http://localhost:3000/api/users/2`
+     - Method: `DELETE`
+
+---
+
+### 5. **Debugging**
+If you face any issues:
+1. Check the **server logs** in the terminal.
+2. Use Postman's **console** to view detailed request/response logs.
